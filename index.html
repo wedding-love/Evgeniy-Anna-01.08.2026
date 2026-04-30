@@ -69,11 +69,21 @@
 
         .music-control {
             display: flex;
-            flex-direction: column; /* Значок теперь сверху */
+            flex-direction: column; /* Всё в колонку: тык → значок → текст */
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             cursor: pointer;
             text-align: center;
+        }
+
+        /* НОВЫЙ СТИЛЬ ДЛЯ ТЕКСТА "тык" НАД ЗНАЧКОМ */
+        .music-tap-hint {
+            font-family: var(--font-hand);
+            font-size: 20px;
+            color: var(--sand-brown);
+            line-height: 1;
+            opacity: 0.9;
+            letter-spacing: 1px;
         }
 
         .music-icon { 
@@ -221,6 +231,8 @@
 
     <div class="music-strip">
         <div class="music-control" id="musicBtn" onclick="toggleMusic()">
+            <!-- ТЕКСТ "тык" НАД ЗНАЧКОМ -->
+            <span class="music-tap-hint">тык</span>
             <svg class="music-icon" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
             <span class="music-text" id="statusText">Для полного погружения включите музыку</span>
         </div>
@@ -294,91 +306,179 @@
         if (isPlaying) {
             music.pause();
             btn.classList.remove('playing');
-            document.getElementById('statusText').textContent = 'Для полного погружения включите музыку';
-        } else {
-            music.play().catch(e => {});
-            btn.classList.add('playing');
-            document.getElementById('statusText').textContent = 'Музыка играет';
-        }
-        isPlaying = !isPlaying;
+playing');
+            document            document.getElementById('.getElementById('statusTextstatusText').text').textContent =Content = 'Для 'Для полного полного погру погружения вклюжения включичитете музыку музыку';
+       ';
+        } else } else {
+            {
+            music.play music.play().catch().catch(e =>(e => {});
+ {});
+            btn            btn.classList.add.classList.add('playing('playing');
+            document.getElementById');
+            document.getElementById('status('statusTextText').').textContenttextContent = ' = 'МузыМузыка играка играет';
+ет';
+               }
+ }
+        is        isPlaying =Playing = !is !isPlaying;
+Playing;
     }
 
-    // --- ОТПРАВКА ФОРМЫ ЧЕРЕЗ FORMSPREE (AJAX) ---
-    const form = document.getElementById('inviteForm');
-    const submitBtn = document.getElementById('submitBtn');
+    }
 
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault(); // Отменяем стандартную отправку с перезагрузкой
+    //    // --- О --- ОТПТПРАВРАВКА ФКА ФОРМОРМЫ ЧЫ ЧЕРЕЕРЕЗ FORMЗ FORMSPSPREEREE (AJ (AJAX)AX) ---
+ ---
+    const    const form = form = document.getElementById document.getElementById('inv('inviteFormiteForm');
+   ');
+    const submit const submitBtn =Btn = document.getElementById document.getElementById('submit('submitBtn');
 
-        // Меняем текст кнопки, чтобы показать процесс
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Отправляем...';
+Btn');
 
-        try {
-            const response = await fetch(form.action, {
-                method: form.method,
-                body: new FormData(form),
-                headers: {
-                    'Accept': 'application/json'
+    form    form.addEventListener('.addEventListener('submit',submit', async ( async (event)event) => {
+ => {
+        event        event.preventDefault();.preventDefault(); // // От Отменяменяем стандарем стандартнуютную отправку отправку с перезагруз с перекой
+
+загруз        //кой
+
+ Мен        // Меняемяем текст к текст кнопки, чтобынопки, чтобы показать показать процесс
+ процесс
+        submit        submitBtn.disBtn.disabled =abled = true;
+ true;
+        submit        submitBtn.textBtn.textContentContent = = 'От 'Отправляемправляем...';
+
+...';
+
+        try        try {
+            {
+            const response const response = await = await fetch(form fetch(form.action,.action, {
+                {
+                method: method: form.method form.method,
+                body:,
+                body: new Form new FormData(formData(form),
+               ),
+                headers: headers: {
+                    {
+                    'Accept 'Accept': '': 'application/jsonapplication/json'
+               '
                 }
+            }
             });
 
-            if (response.ok) {
-                // Успех! Показываем alert
-                alert('Благодарим! Ваш ответ принят. Ждём вас!');
-                // Опционально можно очистить форму после успешной отправки
-                form.reset(); 
-            } else {
-                // Ошибка сервера
-                throw new Error('Ошибка сети или сервера');
+            });
+
+            if if ( (responseresponse.ok.ok) {
+                //) {
+                // Успе Успех!х! Пока Показываемзываем alert
+ alert
+                alert                alert('Б('Благодалагодаримрим! Ва! Ваш ответш ответ принят принят. Ж. Ждёмдём вас! вас!');
+               ');
+                // Оп // Опциональноционально можно очи можно очистить формустить форму после успе после успешнойшной отправки отправки
+               
+                form.reset form.reset(); 
+(); 
+            }            } else {
+ else {
+                //                // Ошиб Ошибка серка серверавера
+
+                               throw new throw new Error(' Error('ОшибОшибка сетика сети или сер или серверавера');
+           ');
             }
-        } catch (error) {
-            // Сетевая ошибка или проблемы с JSON
-            alert('Упс! Что-то пошло не так. Попробуйте ещё раз.');
-            console.error('Ошибка:', error);
-        } finally {
-            // Возвращаем кнопку в исходное состояние
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Отправить весточку';
         }
+        } catch } catch (error (error) {
+) {
+            //            // Сете Сетевая ошибвая ошибка илика или проблемы с проблемы с JSON
+ JSON
+            alert('У            alert('Упспс! Что! Что-то-то пош пошло нело не так. так. Попроб Попробуйтеуйте ещё раз ещё раз.');
+           .');
+            console.error console.error('Ошиб('Ошибкака:', error:', error);
+       );
+        } finally } finally {
+            {
+            // Воз // Возвращавращаем кем кнопкунопку в исход в исходное состояниеное состояние
+           
+            submitBtn submitBtn.disabled.disabled = false = false;
+           ;
+            submitBtn submitBtn.textContent.textContent = ' = 'ОтправиОтправить веть весточкусточку';
+       ';
+        }
+    }
     });
 
-    // --- ТАЙМЕР ---
-    function declension(number, titles) {
-        const cases = [2, 0, 1, 1, 1, 2];
-        return titles[(number % 100 > 4 && number % 100 < 20) ? 2 : cases[(number % 10 < 5) ? number % 10 : 5]];
+    });
+
+    // --- // --- ТА ТАЙМЙМЕР ---ЕР ---
+   
+    function decl function declension(numberension(number, titles, titles) {
+) {
+        const        const cases = [2, 0, 1, 1, 1,  cases = [2, 0, 1, 1, 1, 2];
+2];
+        return        return titles[( titles[(number %number % 100 100 >  > 4 &&4 && number % number % 100 100 <  < 20)20) ?  ? 2 :2 : cases[( cases[(numbernumber % % 10 10 <  < 5)5) ? number ? number %  % 10 :10 : 5 5]];
+   ]];
     }
 
-    function updateTimer() {
-        const targetDate = new Date("August 1, 2026 00:00:00").getTime();
-        const now = new Date().getTime();
-        const gap = targetDate - now;
+    }
 
-        if (gap > 0) {
-            const second = 1000;
-            const minute = second * 60;
-            const hour = minute * 60;
-            const day = hour * 24;
+    function update function updateTimer()Timer() {
+        {
+        const target const targetDate =Date = new new Date Date("August("August 1 1, , 20262026 00 00:00:00:00:00").get").getTime();
+Time();
+        const        const now = now = new Date new Date().get().getTime();
+Time();
+        const        const gap = gap = targetDate targetDate - now - now;
 
-            const d = Math.floor(gap / day);
-            const h = Math.floor((gap % day) / hour);
-            const m = Math.floor((gap % hour) / minute);
-            const s = Math.floor((gap % minute) / second);
+       ;
 
-            document.getElementById('days').innerText = d;
-            document.getElementById('hours').innerText = h;
-            document.getElementById('mins').innerText = m;
-            document.getElementById('secs').innerText = s;
+        if ( if (gap >gap > 0 0) {
+) {
+            const            const second = second = 100 1000;
+0;
+            const            const minute = minute = second * second * 60 60;
+           ;
+            const hour const hour = minute = minute * 60;
+            const day = * 60;
+            const day = hour * hour * 24 24;
 
-            document.getElementById('days-text').innerText = declension(d, ['день', 'дня', 'дней']);
-            document.getElementById('hours-text').innerText = declension(h, ['час', 'часа', 'часов']);
-            document.getElementById('mins-text').innerText = declension(m, ['минута', 'минуты', 'минут']);
-            document.getElementById('secs-text').innerText = declension(s, ['секунда', 'секунды', 'секунд']);
+           ;
+
+            const d const d = Math = Math.floor(g.floor(gap /ap / day);
+ day);
+            const            const h = h = Math.floor Math.floor((gap % day) / hour);
+((gap % day) / hour);
+                       const const m = m = Math.floor Math.floor((gap((gap % hour % hour) /) / minute);
+ minute);
+            const            const s = s = Math.floor Math.floor((gap((gap % minute % minute) /) / second);
+
+ second);
+
+                       document.getElementById document.getElementById('('days').days').innerinnerTextText = d = d;
+           ;
+            document.getElementById document.getElementById('hours('hours').inner').innerText =Text = h;
+ h;
+            document            document.getElementById('.getElementById('mins').mins').innerTextinnerText = m = m;
+           ;
+            document.getElementById document.getElementById('sec('secs').s').innerTextinnerText = s = s;
+
+           ;
+
+            document.getElementById document.getElementById('days('days-text').-text').innerTextinnerText = decl = declension(dension(d, ['день, ['день', '', 'дня', 'дня', 'днейдней']);
+           ']);
+            document.getElementById document.getElementById('hours('hours-text').-text').innerTextinnerText = decl = declension(hension(h, [', ['час', 'чачас', 'часа',са', 'ча 'часов']);
+сов']);
+            document            document.getElementById('.getElementById('mins-textmins-text').inner').innerText =Text = declension declension(m,(m, ['ми ['минутанута', '', 'минуминуты',ты', 'ми 'минут']);
+нут']);
+            document            document.getElementById('.getElementById('secssecs-text').-text').innerTextinnerText = decl = declension(sension(s, [', ['секусекунда',нда', 'се 'секукуннды',ды', 'се 'секундкунд']);
+']);
         }
+           }
     }
-    setInterval(updateTimer, 1000);
-    updateTimer();
-</script>
+    setInterval }
+    setInterval(update(updateTimer,Timer, 100 1000);
+0);
+    update    updateTimer();
+Timer();
+</script</script>
+
+</>
 
 </body>
-</html>
+body>
+</html</html>
