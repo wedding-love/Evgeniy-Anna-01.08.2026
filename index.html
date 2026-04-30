@@ -235,7 +235,7 @@
     <div class="image-block">
         <img src="10.jpg" alt="">
         <div class="form-overlay">
-            <!-- ФОРМА: добавлены action и method -->
+            <!-- ФОРМА -->
             <form id="inviteForm" action="https://formspree.io/f/xzdopljp" method="POST">
                 <div class="quest-block">
                     <label class="quest-label" for="guestName">Ваше имя и Фамилия</label>
@@ -252,8 +252,6 @@
 
                 <button type="submit" class="send-btn" id="submitBtn">Отправить весточку</button>
             </form>
-            <!-- Сюда будем выводить сообщение об успехе -->
-            <div id="formMessage" style="display: none; margin-top: 15px; font-family: var(--font-hand); font-size: 20px; color: var(--gold);"></div>
         </div>
     </div>
 
@@ -308,7 +306,6 @@
     // --- ОТПРАВКА ФОРМЫ ЧЕРЕЗ FORMSPREE (AJAX) ---
     const form = document.getElementById('inviteForm');
     const submitBtn = document.getElementById('submitBtn');
-    const formMessage = document.getElementById('formMessage');
 
     form.addEventListener('submit', async (event) => {
         event.preventDefault(); // Отменяем стандартную отправку с перезагрузкой
@@ -316,7 +313,6 @@
         // Меняем текст кнопки, чтобы показать процесс
         submitBtn.disabled = true;
         submitBtn.textContent = 'Отправляем...';
-        formMessage.style.display = 'none';
 
         try {
             const response = await fetch(form.action, {
@@ -328,19 +324,17 @@
             });
 
             if (response.ok) {
-                // Успех!
-                form.style.display = 'none'; // Скрываем форму
-                formMessage.style.display = 'block';
-                formMessage.textContent = 'Благодарим! Ваш ответ принят. Ждём вас!';
+                // Успех! Показываем alert
+                alert('Благодарим! Ваш ответ принят. Ждём вас!');
+                // Опционально можно очистить форму после успешной отправки
+                form.reset(); 
             } else {
                 // Ошибка сервера
                 throw new Error('Ошибка сети или сервера');
             }
         } catch (error) {
             // Сетевая ошибка или проблемы с JSON
-            formMessage.style.display = 'block';
-            formMessage.style.color = '#800020'; // Бордовый для ошибки
-            formMessage.textContent = 'Упс! Что-то пошло не так. Попробуйте ещё раз.';
+            alert('Упс! Что-то пошло не так. Попробуйте ещё раз.');
             console.error('Ошибка:', error);
         } finally {
             // Возвращаем кнопку в исходное состояние
