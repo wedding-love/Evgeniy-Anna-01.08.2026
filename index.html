@@ -160,6 +160,12 @@
             cursor: pointer;
             margin-top: 5px; 
             border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         /* ТАЙМЕР */
@@ -211,7 +217,7 @@
 <body>
 
 <div class="wrapper">
-    <div class="image-block"><img src="1.jpg"></div>
+    <div class="image-block"><img src="1.jpg" alt=""></div>
 
     <div class="music-strip">
         <div class="music-control" id="musicBtn" onclick="toggleMusic()">
@@ -220,38 +226,41 @@
         </div>
     </div>
 
-    <div class="image-block"><img src="2.jpg"></div>
-    <div class="image-block"><img src="7.jpg"></div>
-    <div class="image-block"><img src="8.jpg"></div>
-    <div class="image-block"><img src="3.jpg"></div>
-    <div class="image-block"><img src="4.jpg"></div>
+    <div class="image-block"><img src="2.jpg" alt=""></div>
+    <div class="image-block"><img src="7.jpg" alt=""></div>
+    <div class="image-block"><img src="8.jpg" alt=""></div>
+    <div class="image-block"><img src="3.jpg" alt=""></div>
+    <div class="image-block"><img src="4.jpg" alt=""></div>
     
     <div class="image-block">
-        <img src="10.jpg">
+        <img src="10.jpg" alt="">
         <div class="form-overlay">
-            <form id="inviteForm">
+            <!-- ФОРМА: добавлены action и method -->
+            <form id="inviteForm" action="https://formspree.io/f/xzdopljp" method="POST">
                 <div class="quest-block">
-                    <label class="quest-label">Ваше имя и Фамилия</label>
-                    <input type="text" class="quest-input" required>
+                    <label class="quest-label" for="guestName">Ваше имя и Фамилия</label>
+                    <input type="text" class="quest-input" id="guestName" name="name" required>
                 </div>
 
                 <div class="quest-block">
                     <label class="quest-label">Будете ли Вы?</label>
                     <div class="radio-group">
-                        <label class="radio-item"><input type="radio" name="attend" value="yes" required> Да</label>
-                        <label class="radio-item"><input type="radio" name="attend" value="no"> Нет</label>
+                        <label class="radio-item"><input type="radio" name="attend" value="Да" required> Да</label>
+                        <label class="radio-item"><input type="radio" name="attend" value="Нет"> Нет</label>
                     </div>
                 </div>
 
-                <button type="submit" class="send-btn">Отправить весточку</button>
+                <button type="submit" class="send-btn" id="submitBtn">Отправить весточку</button>
             </form>
+            <!-- Сюда будем выводить сообщение об успехе -->
+            <div id="formMessage" style="display: none; margin-top: 15px; font-family: var(--font-hand); font-size: 20px; color: var(--gold);"></div>
         </div>
     </div>
 
-    <div class="image-block"><img src="6.jpg"></div>
+    <div class="image-block"><img src="6.jpg" alt=""></div>
 
     <div class="image-block">
-        <img src="9.jpg">
+        <img src="9.jpg" alt="">
         <div class="timer-overlay">
             <div class="timer-display">
                 <div class="timer-unit">
@@ -278,6 +287,7 @@
 <audio id="bgMusic" src="песня.mp3" loop></audio>
 
 <script>
+    // --- МУЗЫКА ---
     const music = document.getElementById('bgMusic');
     const btn = document.getElementById('musicBtn');
     let isPlaying = false;
@@ -295,6 +305,51 @@
         isPlaying = !isPlaying;
     }
 
+    // --- ОТПРАВКА ФОРМЫ ЧЕРЕЗ FORMSPREE (AJAX) ---
+    const form = document.getElementById('inviteForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const formMessage = document.getElementById('formMessage');
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault(); // Отменяем стандартную отправку с перезагрузкой
+
+        // Меняем текст кнопки, чтобы показать процесс
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Отправляем...';
+        formMessage.style.display = 'none';
+
+        try {
+            const response = await fetch(form.action, {
+                method: form.method,
+                body: new FormData(form),
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                // Успех!
+                form.style.display = 'none'; // Скрываем форму
+                formMessage.style.display = 'block';
+                formMessage.textContent = 'Благодарим! Ваш ответ принят. Ждём вас!';
+            } else {
+                // Ошибка сервера
+                throw new Error('Ошибка сети или сервера');
+            }
+        } catch (error) {
+            // Сетевая ошибка или проблемы с JSON
+            formMessage.style.display = 'block';
+            formMessage.style.color = '#800020'; // Бордовый для ошибки
+            formMessage.textContent = 'Упс! Что-то пошло не так. Попробуйте ещё раз.';
+            console.error('Ошибка:', error);
+        } finally {
+            // Возвращаем кнопку в исходное состояние
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Отправить весточку';
+        }
+    });
+
+    // --- ТАЙМЕР ---
     function declension(number, titles) {
         const cases = [2, 0, 1, 1, 1, 2];
         return titles[(number % 100 > 4 && number % 100 < 20) ? 2 : cases[(number % 10 < 5) ? number % 10 : 5]];
