@@ -15,7 +15,7 @@
             --bg-light: #f2f1df; 
             --font-main: 'Forum', serif;
             --font-hand: 'Marck Script', cursive;
-            --burgundy: #800020; /* Бордовый цвет */
+            --burgundy: #800020;
         }
 
         * {
@@ -57,7 +57,6 @@
             display: block;
         }
 
-        /* МУЗЫКА - ОБНОВЛЕННЫЕ СТИЛИ */
         .music-strip {
             background-color: var(--bg-light);
             padding: 20px 0;
@@ -69,14 +68,16 @@
 
         .music-control {
             display: flex;
-            flex-direction: column; /* Всё в колонку: тык → значок → текст */
+            flex-direction: column;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             cursor: pointer;
             text-align: center;
+            user-select: none;
+            -webkit-user-select: none;
+            padding: 10px 20px;
         }
 
-        /* НОВЫЙ СТИЛЬ ДЛЯ ТЕКСТА "тык" НАД ЗНАЧКОМ */
         .music-tap-hint {
             font-family: var(--font-hand);
             font-size: 20px;
@@ -86,10 +87,59 @@
             letter-spacing: 1px;
         }
 
-        .music-icon { 
-            width: 24px; 
-            height: 24px; 
-            fill: var(--sand-brown); 
+        /* КРУГЛАЯ КНОПКА С КВАДРАТОМ */
+        .music-icon-wrapper {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--sand-brown);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            pointer-events: none;
+        }
+
+        .playing .music-icon-wrapper {
+            background-color: var(--burgundy);
+            box-shadow: 0 2px 12px rgba(128, 0, 32, 0.4);
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse { 
+            0% { transform: scale(1); box-shadow: 0 2px 8px rgba(128, 0, 32, 0.4); } 
+            50% { transform: scale(1.08); box-shadow: 0 4px 16px rgba(128, 0, 32, 0.6); } 
+            100% { transform: scale(1); box-shadow: 0 2px 8px rgba(128, 0, 32, 0.4); } 
+        }
+
+        /* Квадрат внутри круга */
+        .music-square {
+            width: 14px;
+            height: 14px;
+            background-color: var(--bg-light);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        /* Когда музыка играет, квадрат превращается в паузу (две полоски) */
+        .playing .music-square {
+            width: 4px;
+            height: 14px;
+            border-radius: 2px;
+            background-color: var(--bg-light);
+            position: relative;
+        }
+
+        .playing .music-square::after {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            width: 4px;
+            height: 14px;
+            background-color: var(--bg-light);
+            border-radius: 2px;
         }
         
         .music-text { 
@@ -97,9 +147,9 @@
             font-size: 18px; 
             color: var(--sand-brown);
             line-height: 1.2;
+            pointer-events: none;
         }
 
-        /* АНКЕТА */
         .form-overlay {
             position: absolute;
             top: 45%; 
@@ -178,7 +228,6 @@
             cursor: not-allowed;
         }
 
-        /* ТАЙМЕР */
         .timer-overlay {
             position: absolute;
             top: 32%; 
@@ -219,9 +268,6 @@
             margin-top: 5px; 
             color: var(--burgundy);
         }
-
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
-        .playing .music-icon { animation: pulse 2s infinite ease-in-out; }
     </style>
 </head>
 <body>
@@ -230,10 +276,14 @@
     <div class="image-block"><img src="IMG_6611.jpeg" alt=""></div>
 
     <div class="music-strip">
-        <div class="music-control" id="musicBtn" onclick="toggleMusic()">
-            <!-- ТЕКСТ "тык" НАД ЗНАЧКОМ -->
-            <span class="music-tap-hint">тык</span>
-            <svg class="music-icon" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+        <div class="music-control" id="musicBtn">
+            <span class="music-tap-hint" id="tapHint">тык</span>
+            
+            <!-- КРУГЛАЯ КНОПКА С КВАДРАТОМ ВНУТРИ -->
+            <div class="music-icon-wrapper">
+                <div class="music-square"></div>
+            </div>
+            
             <span class="music-text" id="statusText">Для полного погружения включите музыку</span>
         </div>
     </div>
@@ -247,7 +297,6 @@
     <div class="image-block">
         <img src="10.jpg" alt="">
         <div class="form-overlay">
-            <!-- ФОРМА -->
             <form id="inviteForm" action="https://formspree.io/f/xzdopljp" method="POST">
                 <div class="quest-block">
                     <label class="quest-label" for="guestName">Ваше имя и Фамилия</label>
@@ -294,191 +343,131 @@
     </div>
 </div>
 
-<audio id="bgMusic" src="песня.mp3" loop></audio>
+<audio id="bgMusic" src="песня.mp3" loop preload="auto"></audio>
 
 <script>
     // --- МУЗЫКА ---
     const music = document.getElementById('bgMusic');
-    const btn = document.getElementById('musicBtn');
+    const musicBtn = document.getElementById('musicBtn');
+    const statusText = document.getElementById('statusText');
+    const tapHint = document.getElementById('tapHint');
     let isPlaying = false;
 
-    function toggleMusic() {
+    // Загружаем аудио
+    music.load();
+
+    musicBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
         if (isPlaying) {
             music.pause();
-            btn.classList.remove('playing');
-playing');
-            document            document.getElementById('.getElementById('statusTextstatusText').text').textContent =Content = 'Для 'Для полного полного погру погружения вклюжения включичитете музыку музыку';
-       ';
-        } else } else {
-            {
-            music.play music.play().catch().catch(e =>(e => {});
- {});
-            btn            btn.classList.add.classList.add('playing('playing');
-            document.getElementById');
-            document.getElementById('status('statusTextText').').textContenttextContent = ' = 'МузыМузыка играка играет';
-ет';
-               }
- }
-        is        isPlaying =Playing = !is !isPlaying;
-Playing;
-    }
+            musicBtn.classList.remove('playing');
+            statusText.textContent = 'Для полного погружения включите музыку';
+            tapHint.style.display = 'block';
+            isPlaying = false;
+        } else {
+            const playPromise = music.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(function() {
+                    musicBtn.classList.add('playing');
+                    statusText.textContent = 'Музыка играет';
+                    tapHint.style.display = 'none';
+                    isPlaying = true;
+                }).catch(function(error) {
+                    console.error('Ошибка воспроизведения:', error);
+                    alert('Не удалось включить музыку. Проверьте, что файл "песня.mp3" находится в той же папке.');
+                    isPlaying = false;
+                });
+            }
+        }
+    });
 
-    }
+    // --- ОТПРАВКА ФОРМЫ ---
+    const form = document.getElementById('inviteForm');
+    const submitBtn = document.getElementById('submitBtn');
 
-    //    // --- О --- ОТПТПРАВРАВКА ФКА ФОРМОРМЫ ЧЫ ЧЕРЕЕРЕЗ FORMЗ FORMSPSPREEREE (AJ (AJAX)AX) ---
- ---
-    const    const form = form = document.getElementById document.getElementById('inv('inviteFormiteForm');
-   ');
-    const submit const submitBtn =Btn = document.getElementById document.getElementById('submit('submitBtn');
+    form.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Отправляем...';
 
-Btn');
-
-    form    form.addEventListener('.addEventListener('submit',submit', async ( async (event)event) => {
- => {
-        event        event.preventDefault();.preventDefault(); // // От Отменяменяем стандарем стандартнуютную отправку отправку с перезагруз с перекой
-
-загруз        //кой
-
- Мен        // Меняемяем текст к текст кнопки, чтобынопки, чтобы показать показать процесс
- процесс
-        submit        submitBtn.disBtn.disabled =abled = true;
- true;
-        submit        submitBtn.textBtn.textContentContent = = 'От 'Отправляемправляем...';
-
-...';
-
-        try        try {
-            {
-            const response const response = await = await fetch(form fetch(form.action,.action, {
-                {
-                method: method: form.method form.method,
-                body:,
-                body: new Form new FormData(formData(form),
-               ),
-                headers: headers: {
-                    {
-                    'Accept 'Accept': '': 'application/jsonapplication/json'
-               '
+        try {
+            const response = await fetch(form.action, {
+                method: form.method,
+                body: new FormData(form),
+                headers: {
+                    'Accept': 'application/json'
                 }
-            }
             });
 
-            });
-
-            if if ( (responseresponse.ok.ok) {
-                //) {
-                // Успе Успех!х! Пока Показываемзываем alert
- alert
-                alert                alert('Б('Благодалагодаримрим! Ва! Ваш ответш ответ принят принят. Ж. Ждёмдём вас! вас!');
-               ');
-                // Оп // Опциональноционально можно очи можно очистить формустить форму после успе после успешнойшной отправки отправки
-               
-                form.reset form.reset(); 
-(); 
-            }            } else {
- else {
-                //                // Ошиб Ошибка серка серверавера
-
-                               throw new throw new Error(' Error('ОшибОшибка сетика сети или сер или серверавера');
-           ');
+            if (response.ok) {
+                alert('Благодарим! Ваш ответ принят. Ждём вас!');
+                form.reset();
+            } else {
+                throw new Error('Ошибка сервера');
             }
+        } catch (error) {
+            alert('Упс! Что-то пошло не так. Попробуйте ещё раз.');
+            console.error('Ошибка:', error);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Отправить весточку';
         }
-        } catch } catch (error (error) {
-) {
-            //            // Сете Сетевая ошибвая ошибка илика или проблемы с проблемы с JSON
- JSON
-            alert('У            alert('Упспс! Что! Что-то-то пош пошло нело не так. так. Попроб Попробуйтеуйте ещё раз ещё раз.');
-           .');
-            console.error console.error('Ошиб('Ошибкака:', error:', error);
-       );
-        } finally } finally {
-            {
-            // Воз // Возвращавращаем кем кнопкунопку в исход в исходное состояниеное состояние
-           
-            submitBtn submitBtn.disabled.disabled = false = false;
-           ;
-            submitBtn submitBtn.textContent.textContent = ' = 'ОтправиОтправить веть весточкусточку';
-       ';
-        }
-    }
     });
 
-    });
-
-    // --- // --- ТА ТАЙМЙМЕР ---ЕР ---
-   
-    function decl function declension(numberension(number, titles, titles) {
-) {
-        const        const cases = [2, 0, 1, 1, 1,  cases = [2, 0, 1, 1, 1, 2];
-2];
-        return        return titles[( titles[(number %number % 100 100 >  > 4 &&4 && number % number % 100 100 <  < 20)20) ?  ? 2 :2 : cases[( cases[(numbernumber % % 10 10 <  < 5)5) ? number ? number %  % 10 :10 : 5 5]];
-   ]];
+    // --- ТАЙМЕР ---
+    function declension(number, titles) {
+        var cases = [2, 0, 1, 1, 1, 2];
+        var n = Math.abs(number);
+        return titles[(n % 100 > 4 && n % 100 < 20) ? 2 : cases[(n % 10 < 5) ? n % 10 : 5]];
     }
 
-    }
+    function updateTimer() {
+        // 1 августа 2026 года (месяц 7 = август, т.к. январь = 0)
+        var targetDate = new Date(2026, 7, 1, 0, 0, 0);
+        var now = new Date();
+        var gap = targetDate - now;
 
-    function update function updateTimer()Timer() {
-        {
-        const target const targetDate =Date = new new Date Date("August("August 1 1, , 20262026 00 00:00:00:00:00").get").getTime();
-Time();
-        const        const now = now = new Date new Date().get().getTime();
-Time();
-        const        const gap = gap = targetDate targetDate - now - now;
+        if (gap > 0) {
+            var day = 1000 * 60 * 60 * 24;
+            var hour = 1000 * 60 * 60;
+            var minute = 1000 * 60;
+            var second = 1000;
 
-       ;
+            var d = Math.floor(gap / day);
+            var h = Math.floor((gap % day) / hour);
+            var m = Math.floor((gap % hour) / minute);
+            var s = Math.floor((gap % minute) / second);
 
-        if ( if (gap >gap > 0 0) {
-) {
-            const            const second = second = 100 1000;
-0;
-            const            const minute = minute = second * second * 60 60;
-           ;
-            const hour const hour = minute = minute * 60;
-            const day = * 60;
-            const day = hour * hour * 24 24;
+            document.getElementById('days').innerText = String(d).padStart(2, '0');
+            document.getElementById('hours').innerText = String(h).padStart(2, '0');
+            document.getElementById('mins').innerText = String(m).padStart(2, '0');
+            document.getElementById('secs').innerText = String(s).padStart(2, '0');
 
-           ;
-
-            const d const d = Math = Math.floor(g.floor(gap /ap / day);
- day);
-            const            const h = h = Math.floor Math.floor((gap % day) / hour);
-((gap % day) / hour);
-                       const const m = m = Math.floor Math.floor((gap((gap % hour % hour) /) / minute);
- minute);
-            const            const s = s = Math.floor Math.floor((gap((gap % minute % minute) /) / second);
-
- second);
-
-                       document.getElementById document.getElementById('('days').days').innerinnerTextText = d = d;
-           ;
-            document.getElementById document.getElementById('hours('hours').inner').innerText =Text = h;
- h;
-            document            document.getElementById('.getElementById('mins').mins').innerTextinnerText = m = m;
-           ;
-            document.getElementById document.getElementById('sec('secs').s').innerTextinnerText = s = s;
-
-           ;
-
-            document.getElementById document.getElementById('days('days-text').-text').innerTextinnerText = decl = declension(dension(d, ['день, ['день', '', 'дня', 'дня', 'днейдней']);
-           ']);
-            document.getElementById document.getElementById('hours('hours-text').-text').innerTextinnerText = decl = declension(hension(h, [', ['час', 'чачас', 'часа',са', 'ча 'часов']);
-сов']);
-            document            document.getElementById('.getElementById('mins-textmins-text').inner').innerText =Text = declension declension(m,(m, ['ми ['минутанута', '', 'минуминуты',ты', 'ми 'минут']);
-нут']);
-            document            document.getElementById('.getElementById('secssecs-text').-text').innerTextinnerText = decl = declension(sension(s, [', ['секусекунда',нда', 'се 'секукуннды',ды', 'се 'секундкунд']);
-']);
+            document.getElementById('days-text').innerText = declension(d, ['день', 'дня', 'дней']);
+            document.getElementById('hours-text').innerText = declension(h, ['час', 'часа', 'часов']);
+            document.getElementById('mins-text').innerText = declension(m, ['минута', 'минуты', 'минут']);
+            document.getElementById('secs-text').innerText = declension(s, ['секунда', 'секунды', 'секунд']);
+        } else {
+            document.getElementById('days').innerText = '00';
+            document.getElementById('hours').innerText = '00';
+            document.getElementById('mins').innerText = '00';
+            document.getElementById('secs').innerText = '00';
+            
+            document.getElementById('days-text').innerText = 'дней';
+            document.getElementById('hours-text').innerText = 'часов';
+            document.getElementById('mins-text').innerText = 'минут';
+            document.getElementById('secs-text').innerText = 'секунд';
         }
-           }
     }
-    setInterval }
-    setInterval(update(updateTimer,Timer, 100 1000);
-0);
-    update    updateTimer();
-Timer();
-</script</script>
 
-</>
+    // Запускаем таймер сразу и обновляем каждую секунду
+    updateTimer();
+    setInterval(updateTimer, 1000);
+</script>
 
 </body>
-body>
-</html</html>
+</html>
