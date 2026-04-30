@@ -32,6 +32,7 @@
             scroll-behavior: smooth;
             overflow-x: hidden; 
             color: var(--accent);
+            -webkit-text-size-adjust: 100%;
         }
 
         .wrapper {
@@ -76,21 +77,26 @@
             user-select: none;
             -webkit-user-select: none;
             padding: 10px 20px;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         .music-tap-hint {
             font-family: var(--font-hand);
-            font-size: 20px;
+            font-size: clamp(16px, 4vw, 20px);
             color: var(--sand-brown);
             line-height: 1;
             opacity: 0.9;
             letter-spacing: 1px;
+            pointer-events: none;
         }
 
-        /* КРУГЛАЯ КНОПКА С КВАДРАТОМ */
+        /* КРУГЛАЯ КНОПКА */
         .music-icon-wrapper {
             width: 48px;
             height: 48px;
+            min-width: 48px;
+            min-height: 48px;
             border-radius: 50%;
             background-color: var(--sand-brown);
             display: flex;
@@ -99,11 +105,11 @@
             transition: all 0.3s ease;
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             pointer-events: none;
+            position: relative;
         }
 
         .playing .music-icon-wrapper {
             background-color: var(--burgundy);
-            box-shadow: 0 2px 12px rgba(128, 0, 32, 0.4);
             animation: pulse 2s infinite ease-in-out;
         }
 
@@ -113,38 +119,43 @@
             100% { transform: scale(1); box-shadow: 0 2px 8px rgba(128, 0, 32, 0.4); } 
         }
 
-        /* Квадрат внутри круга */
-        .music-square {
-            width: 14px;
-            height: 14px;
-            background-color: var(--bg-light);
-            border-radius: 2px;
+        /* СТРЕЛКА PLAY (треугольник) */
+        .play-icon {
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 8px 0 8px 16px;
+            border-color: transparent transparent transparent var(--bg-light);
+            margin-left: 3px;
             transition: all 0.3s ease;
         }
 
-        /* Когда музыка играет, квадрат превращается в паузу (две полоски) */
-        .playing .music-square {
-            width: 4px;
-            height: 14px;
-            border-radius: 2px;
-            background-color: var(--bg-light);
-            position: relative;
+        /* ПАУЗА (две полоски) */
+        .pause-icon {
+            display: none;
+            gap: 4px;
+            align-items: center;
+            justify-content: center;
         }
 
-        .playing .music-square::after {
-            content: '';
-            position: absolute;
-            left: 8px;
-            top: 0;
+        .playing .play-icon {
+            display: none;
+        }
+
+        .playing .pause-icon {
+            display: flex;
+        }
+
+        .pause-bar {
             width: 4px;
-            height: 14px;
+            height: 16px;
             background-color: var(--bg-light);
             border-radius: 2px;
         }
         
         .music-text { 
             font-family: var(--font-hand); 
-            font-size: 18px; 
+            font-size: clamp(14px, 3.5vw, 18px);
             color: var(--sand-brown);
             line-height: 1.2;
             pointer-events: none;
@@ -167,7 +178,7 @@
 
         .quest-label {
             font-family: var(--font-hand);
-            font-size: 24px;
+            font-size: clamp(18px, 5vw, 24px);
             color: var(--accent);
             display: block;
             margin-bottom: 8px;
@@ -180,7 +191,7 @@
             border-bottom: 1px solid var(--gold); 
             padding: 5px;
             font-family: var(--font-hand);
-            font-size: 22px;
+            font-size: clamp(16px, 4.5vw, 22px);
             text-align: center;
             outline: none;
             color: var(--sand-brown);
@@ -189,13 +200,13 @@
         .radio-group {
             display: flex;
             justify-content: center;
-            gap: 50px;
+            gap: clamp(30px, 10vw, 50px);
             margin-top: 40px; 
         }
 
         .radio-item {
             font-family: var(--font-hand);
-            font-size: 22px;
+            font-size: clamp(16px, 4.5vw, 22px);
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -233,14 +244,14 @@
             top: 32%; 
             left: 50%;
             transform: translateX(-50%);
-            width: 80%;
+            width: 90%;
             text-align: center;
         }
 
         .timer-display {
             display: flex;
             justify-content: center;
-            gap: 2px;
+            gap: clamp(2px, 1vw, 4px);
         }
 
         .timer-unit {
@@ -248,12 +259,12 @@
             flex-direction: column;
             align-items: center;
             color: var(--burgundy);
-            min-width: 52px;
+            min-width: clamp(45px, 12vw, 52px);
         }
 
         .timer-val {
             font-family: var(--font-main);
-            font-size: clamp(22px, 6.5vw, 28px);
+            font-size: clamp(18px, 5vw, 28px);
             font-weight: bold;
             line-height: 1;
             color: var(--burgundy);
@@ -262,7 +273,7 @@
 
         .timer-label {
             font-family: var(--font-main);
-            font-size: 7.5px;
+            font-size: clamp(6px, 1.8vw, 7.5px);
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-top: 5px; 
@@ -279,9 +290,13 @@
         <div class="music-control" id="musicBtn">
             <span class="music-tap-hint" id="tapHint">тык</span>
             
-            <!-- КРУГЛАЯ КНОПКА С КВАДРАТОМ ВНУТРИ -->
+            <!-- КРУГЛАЯ КНОПКА С ТРЕУГОЛЬНИКОМ -->
             <div class="music-icon-wrapper">
-                <div class="music-square"></div>
+                <div class="play-icon"></div>
+                <div class="pause-icon">
+                    <div class="pause-bar"></div>
+                    <div class="pause-bar"></div>
+                </div>
             </div>
             
             <span class="music-text" id="statusText">Для полного погружения включите музыку</span>
@@ -347,11 +362,11 @@
 
 <script>
     // --- МУЗЫКА ---
-    const music = document.getElementById('bgMusic');
-    const musicBtn = document.getElementById('musicBtn');
-    const statusText = document.getElementById('statusText');
-    const tapHint = document.getElementById('tapHint');
-    let isPlaying = false;
+    var music = document.getElementById('bgMusic');
+    var musicBtn = document.getElementById('musicBtn');
+    var statusText = document.getElementById('statusText');
+    var tapHint = document.getElementById('tapHint');
+    var isPlaying = false;
 
     // Загружаем аудио
     music.load();
@@ -361,21 +376,25 @@
         e.stopPropagation();
         
         if (isPlaying) {
+            // Останавливаем музыку
             music.pause();
             musicBtn.classList.remove('playing');
             statusText.textContent = 'Для полного погружения включите музыку';
             tapHint.style.display = 'block';
             isPlaying = false;
         } else {
-            const playPromise = music.play();
+            // Запускаем музыку
+            var playPromise = music.play();
             
             if (playPromise !== undefined) {
                 playPromise.then(function() {
+                    // Воспроизведение началось успешно
                     musicBtn.classList.add('playing');
                     statusText.textContent = 'Музыка играет';
                     tapHint.style.display = 'none';
                     isPlaying = true;
                 }).catch(function(error) {
+                    // Ошибка воспроизведения
                     console.error('Ошибка воспроизведения:', error);
                     alert('Не удалось включить музыку. Проверьте, что файл "песня.mp3" находится в той же папке.');
                     isPlaying = false;
@@ -385,8 +404,8 @@
     });
 
     // --- ОТПРАВКА ФОРМЫ ---
-    const form = document.getElementById('inviteForm');
-    const submitBtn = document.getElementById('submitBtn');
+    var form = document.getElementById('inviteForm');
+    var submitBtn = document.getElementById('submitBtn');
 
     form.addEventListener('submit', async function(event) {
         event.preventDefault();
@@ -395,7 +414,7 @@
         submitBtn.textContent = 'Отправляем...';
 
         try {
-            const response = await fetch(form.action, {
+            var response = await fetch(form.action, {
                 method: form.method,
                 body: new FormData(form),
                 headers: {
@@ -426,7 +445,7 @@
     }
 
     function updateTimer() {
-        // 1 августа 2026 года (месяц 7 = август, т.к. январь = 0)
+        // Дата свадьбы: 1 августа 2026 года
         var targetDate = new Date(2026, 7, 1, 0, 0, 0);
         var now = new Date();
         var gap = targetDate - now;
@@ -464,7 +483,7 @@
         }
     }
 
-    // Запускаем таймер сразу и обновляем каждую секунду
+    // Запускаем таймер
     updateTimer();
     setInterval(updateTimer, 1000);
 </script>
